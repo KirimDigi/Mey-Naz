@@ -2837,7 +2837,7 @@ var WdsAudio = {"source":"url","audio_link":"..\/Music\/Angga%20Candra%20-%20Sam
 					<h2 class="elementor-heading-title elementor-size-default">Kepada Yth :<br>
 Bpk/ibu/Saudara/i</h2>				</div>
 				</div>
-				<div class="elementor-element elementor-element-e74060e elementor-widget elementor-widget-heading" data-id="e74060e" data-element_type="widget" data-e-type="widget" data-widget_type="heading.default">
+				<div class="elementor-element elementor-element-e74060e namatamu elementor-widget elementor-widget-heading" data-id="e74060e" data-element_type="widget" data-e-type="widget" data-widget_type="heading.default">
 				<div class="elementor-widget-container">
 					<h2 class="elementor-heading-title elementor-size-default">Nama Tamu</h2>				</div>
 				</div>
@@ -3160,5 +3160,33 @@ document.addEventListener("visibilitychange", event => {
 })
 </script>
 <style id="e-addons-template-dynamic-164270d-inline">.elementor:is(.e-post-39500,.e-loop-item-39500) .elementor-element.elementor-element-164270d:not(.elementor-motion-effects-element-type-background), .elementor:is(.e-post-39500,.e-loop-item-39500) .elementor-element.elementor-element-164270d > .elementor-motion-effects-container > .elementor-motion-effects-layer{background-image: url("https://i.pinimg.com/736x/d3/6a/b9/d36ab9b5bbfc2430a28e55f7e5fae762.jpg");--e-bg-lazyload:url("https://i.pinimg.com/736x/d3/6a/b9/d36ab9b5bbfc2430a28e55f7e5fae762.jpg");background-position: center center;background-size: cover;}</style>	<script defer="" src="../beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"e976b156af73466291d2640f7a5c8199","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+
+<script>
+jQuery(document).ready(function($) {
+    function getUrlParameter(name) {
+        // 1. Try to get from URL query string
+        let searchParams = new URLSearchParams(window.location.search);
+        if (searchParams.has(name)) {
+            return searchParams.get(name);
+        }
+        // 2. Try to get from URL hash (e.g. #to=Nama)
+        if (window.location.hash) {
+            let hash = window.location.hash.substring(1);
+            let hashParams = new URLSearchParams(hash);
+            if (hashParams.has(name)) {
+                return hashParams.get(name);
+            }
+        }
+        return null;
+    }
+
+    let guestName = getUrlParameter('to');
+    if (guestName) {
+        guestName = guestName.trim();
+        $('.namatamu .elementor-heading-title').text(guestName);
+    }
+});
+</script>
+
 </body>
 </html>
