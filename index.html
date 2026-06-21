@@ -3164,17 +3164,14 @@ document.addEventListener("visibilitychange", event => {
 <script>
 jQuery(document).ready(function($) {
     function getUrlParameter(name) {
-        // 1. Try to get from URL query string
-        let searchParams = new URLSearchParams(window.location.search);
-        if (searchParams.has(name)) {
-            return searchParams.get(name);
-        }
-        // 2. Try to get from URL hash (e.g. #to=Nama)
-        if (window.location.hash) {
-            let hash = window.location.hash.substring(1);
-            let hashParams = new URLSearchParams(hash);
-            if (hashParams.has(name)) {
-                return hashParams.get(name);
+        let searchAndHash = window.location.search + window.location.hash;
+        let regex = new RegExp('(?:^|[?&#])' + name + '=([^&#]*)', 'i');
+        let match = regex.exec(searchAndHash);
+        if (match) {
+            try {
+                return decodeURIComponent(match[1]);
+            } catch(e) {
+                return match[1];
             }
         }
         return null;
