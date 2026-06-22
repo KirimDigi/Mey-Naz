@@ -2561,9 +2561,9 @@ function _pauseAudio(){
 
 	<div class="saic-wrap-link">
 
-		<a href="index-1.htm?post_id=39500&#038;comments=2&#038;get=500&#038;order=DESC" id="saic-link-39500" class="custom-saic-link saic-icon-link saic-icon-link-true">
-			<i class="saico-comment"></i>
-			<span>2</span>
+		<a href="index-1.htm?post_id=39500&#038;comments=2&#038;get=500&#038;order=DESC" id="saic-link-39500" class="custom-saic-link saic-icon-link saic-icon-link-true" style="color: #000000 !important; font-weight: bold;">
+			<i class="saico-comment" style="color: #000000 !important;"></i>
+			<span style="color: #000000 !important;">1</span>
 			Ucapan		</a>
 
 	</div>
@@ -3187,13 +3187,13 @@ jQuery(document).ready(function($) {
 
     // 2. RSVP & Wishes Google Spreadsheet Integration
     // Replace with your Google Apps Script Web App URL after deploying
-    const scriptUrl = "https://script.google.com/macros/s/AKfycbxG_FwzGgZ-T24p-5YJq1t1XW2c4yO0p1_pB0J1K0z1J1x0Q_0Q1z0x1w/exec";
+    const scriptUrl = "https://script.google.com/macros/s/AKfycbzJrtZD_y4SXJcxbJ_zi2Uz1Ig_U7HBys8AjUZ419aUs9haLNSsUR0-qhrM4Be-rRDh9A/exec";
     const wishesList = $("#saic-container-comment-39500");
     
     // Inject "Tampilkan Ucapan" / "Sembunyikan Ucapan" button
     const toggleBtnHtml = `
         <div class="saic-wrap-toggle-wishes" style="margin-top: 15px; text-align: center;">
-            <button type="button" id="toggle-wishes-btn" style="background-color: #3D7DBC; color: white; font-weight: 600; padding: 8px 20px; border: 0; border-radius: 3px; cursor: pointer; width: 100%; box-sizing: border-box; font-family: inherit; font-size: 1em; transition: background 0.2s;">
+            <button type="button" id="toggle-wishes-btn" style="background-color: #000000; color: white; font-weight: 600; padding: 8px 20px; border: 0; border-radius: 3px; cursor: pointer; width: 100%; box-sizing: border-box; font-family: inherit; font-size: 1em; transition: background 0.2s;">
                 Tampilkan Ucapan
             </button>
         </div>
@@ -3202,8 +3202,8 @@ jQuery(document).ready(function($) {
     
     // Add hover effect matching the submit button
     $("#toggle-wishes-btn").hover(
-        function() { $(this).css("background-color", "#4d8ac5"); },
-        function() { $(this).css("background-color", "#3D7DBC"); }
+        function() { $(this).css("background-color", "#333333"); },
+        function() { $(this).css("background-color", "#000000"); }
     );
 
     wishesList.hide();
@@ -3252,6 +3252,9 @@ jQuery(document).ready(function($) {
                     // Sort wishes by timestamp descending (newest first)
                     const sortedData = response.data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                     
+                    // Update count dynamic
+                    $("#saic-link-39500 span").text(sortedData.length);
+                    
                     sortedData.forEach(function(item) {
                         const attendanceBadge = item.kehadiran === "present" ? "Hadir" : (item.kehadiran === "notpresent" ? "Tidak Hadir" : "Ragu-ragu");
                         const badgeColor = item.kehadiran === "present" ? "#319342" : (item.kehadiran === "notpresent" ? "#C85951" : "#888");
@@ -3279,6 +3282,7 @@ jQuery(document).ready(function($) {
                     });
                 } else {
                     wishesList.html('<li class="saic-item-comment" style="text-align: center; padding: 20px; color: #999; list-style: none;">Belum ada ucapan.</li>');
+                    $("#saic-link-39500 span").text("0");
                 }
             },
             error: function() {
