@@ -2561,14 +2561,14 @@ function _pauseAudio(){
 
 	<div class="saic-wrap-link">
 
-		<a href="index-1.htm?post_id=39500&#038;comments=2&#038;get=500&#038;order=DESC" id="saic-link-39500" class="saic-link saic-icon-link saic-icon-link-true auto-load-true">
+		<a href="index-1.htm?post_id=39500&#038;comments=2&#038;get=500&#038;order=DESC" id="saic-link-39500" class="custom-saic-link saic-icon-link saic-icon-link-true">
 			<i class="saico-comment"></i>
 			<span>2</span>
 			Ucapan		</a>
 
 	</div>
 
-	<div id="saic-wrap-comment-39500" class="saic-wrap-comments" style="display: none;" data-id="39500">
+	<div id="saic-wrap-comment-39500" class="saic-wrap-comments" style="display: block;" data-id="39500">
 
 		<div id="saic-wrap-form-39500" class="saic-wrap-form saic-clearfix">
 
@@ -3163,6 +3163,7 @@ document.addEventListener("visibilitychange", event => {
 
 <script>
 jQuery(document).ready(function($) {
+    // 1. URL Parameter Guest Name
     function getUrlParameter(name) {
         let searchAndHash = window.location.search + window.location.hash;
         let regex = new RegExp('(?:^|[?&#])' + name + '=([^&#]*)', 'i');
@@ -3181,7 +3182,209 @@ jQuery(document).ready(function($) {
     if (guestName) {
         guestName = guestName.trim();
         $('.namatamu .elementor-heading-title').text(guestName);
+        $('#author').val(guestName); // Autofill author name in RSVP form
     }
+
+    // 2. RSVP & Wishes Google Spreadsheet Integration
+    // Replace with your Google Apps Script Web App URL after deploying
+    const scriptUrl = "https://script.google.com/macros/s/AKfycbxG_FwzGgZ-T24p-5YJq1t1XW2c4yO0p1_pB0J1K0z1J1x0Q_0Q1z0x1w/exec";
+    const wishesList = $("#saic-container-comment-39500");
+    
+    // Inject "Tampilkan Ucapan" / "Sembunyikan Ucapan" button
+    const toggleBtnHtml = `
+        <div class="saic-wrap-toggle-wishes" style="margin-top: 15px; text-align: center;">
+            <button type="button" id="toggle-wishes-btn" style="background-color: #3D7DBC; color: white; font-weight: 600; padding: 8px 20px; border: 0; border-radius: 3px; cursor: pointer; width: 100%; box-sizing: border-box; font-family: inherit; font-size: 1em; transition: background 0.2s;">
+                Tampilkan Ucapan
+            </button>
+        </div>
+    `;
+    $(".saic-wrap-submit").after(toggleBtnHtml);
+    
+    // Add hover effect matching the submit button
+    $("#toggle-wishes-btn").hover(
+        function() { $(this).css("background-color", "#4d8ac5"); },
+        function() { $(this).css("background-color", "#3D7DBC"); }
+    );
+
+    wishesList.hide();
+
+    function formatTime(dateStr) {
+        try {
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) return "Baru saja";
+            
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMins / 60);
+            const diffDays = Math.floor(diffHours / 24);
+            
+            if (diffMins < 1) return "Baru saja";
+            if (diffMins < 60) return `${diffMins} menit yang lalu`;
+            if (diffHours < 24) return `${diffHours} jam yang lalu`;
+            if (diffDays === 1) return "Kemarin";
+            if (diffDays < 7) return `${diffDays} hari yang lalu`;
+            
+            return date.toLocaleDateString("id-ID", {
+                day: "numeric",
+                month: "long",
+                year: "numeric"
+            });
+        } catch (e) {
+            return "Baru saja";
+        }
+    }
+
+    function escapeHtml(str) {
+        return str ? str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;") : "";
+    }
+
+    function loadWishes() {
+        wishesList.html('<li class="saic-item-comment" style="text-align: center; padding: 20px; list-style: none;">Memuat ucapan...</li>');
+        
+        $.ajax({
+            url: scriptUrl,
+            method: "GET",
+            dataType: "json",
+            success: function(response) {
+                if (response.status === "success" && response.data && response.data.length > 0) {
+                    wishesList.empty();
+                    // Sort wishes by timestamp descending (newest first)
+                    const sortedData = response.data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                    
+                    sortedData.forEach(function(item) {
+                        const attendanceBadge = item.kehadiran === "present" ? "Hadir" : (item.kehadiran === "notpresent" ? "Tidak Hadir" : "Ragu-ragu");
+                        const badgeColor = item.kehadiran === "present" ? "#319342" : (item.kehadiran === "notpresent" ? "#C85951" : "#888");
+                        
+                        const commentHtml = `
+                            <li class="saic-item-comment" style="list-style: none;">
+                                <div class="saic-comment-avatar">
+                                    <img src="https://secure.gravatar.com/avatar/d28f060878f04974fcd244a24bc69911?s=96&d=mm&r=g" alt="avatar">
+                                </div>
+                                <div class="saic-comment-content">
+                                    <div class="saic-comment-info">
+                                        <span class="saic-commenter-name">${escapeHtml(item.nama)}</span>
+                                        <span class="saic-author-mark" style="background-color: ${badgeColor}; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.7em; margin-left: 8px; font-weight: bold;">
+                                            ${attendanceBadge}
+                                        </span>
+                                    </div>
+                                    <div class="saic-comment-text">
+                                        <p>${escapeHtml(item.ucapan)}</p>
+                                    </div>
+                                    <div class="saic-comment-time">${formatTime(item.timestamp)}</div>
+                                </div>
+                            </li>
+                        `;
+                        wishesList.append(commentHtml);
+                    });
+                } else {
+                    wishesList.html('<li class="saic-item-comment" style="text-align: center; padding: 20px; color: #999; list-style: none;">Belum ada ucapan.</li>');
+                }
+            },
+            error: function() {
+                wishesList.html('<li class="saic-item-comment" style="text-align: center; padding: 20px; color: #C85951; list-style: none;">Gagal memuat ucapan. Silakan coba lagi nanti.</li>');
+            }
+        });
+    }
+
+    // Toggle wishes visibility
+    $("#toggle-wishes-btn").click(function() {
+        if (wishesList.is(":visible")) {
+            wishesList.slideUp(200);
+            $(this).text("Tampilkan Ucapan");
+        } else {
+            loadWishes();
+            wishesList.slideDown(200);
+            $(this).text("Sembunyikan Ucapan");
+        }
+    });
+
+    // Hijack submit to save data to Google Sheet
+    $("#commentform-39500").off("submit").on("submit", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const form = $(this);
+        const submitBtn = form.find('input[type="submit"]');
+        const statusDiv = $("#saic-comment-status-39500");
+        
+        const authorInput = $("#author");
+        const commentTextarea = $("#saic-textarea-39500");
+        const attendanceSelect = $("#attendance");
+        const guestSelect = $("#guest");
+        
+        let isValid = true;
+        
+        if (!authorInput.val().trim()) {
+            authorInput.addClass("saic-error");
+            form.find(".saic-error-info-name").show().fadeOut(3000);
+            isValid = false;
+        }
+        
+        if (!attendanceSelect.val()) {
+            attendanceSelect.addClass("saic-error");
+            form.find(".saic-error-info-attendance").show().fadeOut(3000);
+            isValid = false;
+        }
+        
+        if (attendanceSelect.val() === "present" && !guestSelect.val()) {
+            guestSelect.addClass("saic-error");
+            form.find(".saic-error-info-guest").show().fadeOut(3000);
+            isValid = false;
+        }
+        
+        if (commentTextarea.val().trim().length < 2) {
+            commentTextarea.addClass("saic-error");
+            form.find(".saic-error-info-text").show().fadeOut(3000);
+            isValid = false;
+        }
+        
+        if (!isValid) return false;
+        
+        submitBtn.attr("disabled", "disabled");
+        statusDiv.addClass("saic-loading").html('<span class="saico-loading"></span>').show();
+        
+        const data = {
+            nama: authorInput.val().trim(),
+            ucapan: commentTextarea.val().trim(),
+            kehadiran: attendanceSelect.val(),
+            jumlah: attendanceSelect.val() === "present" ? guestSelect.val() : "0"
+        };
+        
+        $.ajax({
+            url: scriptUrl,
+            method: "POST",
+            data: JSON.stringify(data),
+            contentType: "text/plain; charset=utf-8",
+            success: function(response) {
+                statusDiv.removeClass("saic-loading").html("");
+                
+                // Clear form fields
+                commentTextarea.val("");
+                attendanceSelect.val("");
+                guestSelect.val("");
+                $(".saic-wrap-guest").hide();
+                
+                statusDiv.html('<p class="saic-ajax-success">Terima kasih atas ucapan dan doa restunya!</p>').show();
+                
+                // Refresh list if open
+                if (wishesList.is(":visible")) {
+                    loadWishes();
+                }
+            },
+            error: function() {
+                statusDiv.removeClass("saic-loading").html('<p class="saic-ajax-error">Terjadi kesalahan. Silakan coba lagi.</p>').show();
+            },
+            complete: function() {
+                submitBtn.removeAttr("disabled");
+                setTimeout(function() {
+                    statusDiv.fadeOut(600);
+                }, 4000);
+            }
+        });
+        
+        return false;
+    });
 });
 </script>
 
